@@ -17,6 +17,7 @@ dependencies:
   android_intent_plus: ^4.0.3
   receive_intent: ^0.2.4
   fixnum: ^1.1.0
+  screenshot: ^2.1.0
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:math';
 import 'dart:typed_data';
 
 // import 'package:fixnum/fixnum.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 
 // import 'package:android_intent/android_intent.dart';
 import 'package:flutter/services.dart';
+import 'package:screenshot/screenshot.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -18,6 +20,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ScreenshotController screenshotController = ScreenshotController();
+
   _MyHomePageState() {
     _MyHomePageState.instance.configureChannel();
   }
@@ -91,6 +95,27 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  var myLongWidget = Builder(builder: (context) {
+    return Container(
+        width: 570,
+        padding: const EdgeInsets.all(10.0),
+        ///
+        /// Note: Do not use Scrolling widget, instead place your children in Column.
+        ///
+        /// Do not use widgets like 'Expanded','Flexible',or 'Spacer'
+        ///
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (int i = 0; i < 15; i++)
+              Text("Tile Test ---------- $i", overflow: TextOverflow.ellipsis ,
+                style: const TextStyle(fontSize: 40),),
+          ],
+        ));
+  });
+
+  Uint8List? capturedImage; // Variable to hold the captured image
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -157,6 +182,41 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
+                  ElevatedButton(
+                      onPressed: () async => {
+                            screenshotController
+                                .captureFromLongWidget(
+                              InheritedTheme.captureAll(
+                                context,
+                                Material(
+                                  child: myLongWidget,
+                                ),
+                              ),
+                              delay: const Duration(milliseconds: 100),
+                              context: context,
+                            )
+                                .then((capturedImage2) async {
+                              // Handle captured image
+                              capturedImage = capturedImage2;
+                              setState(() {}); // Update the UI to display the captured image
+
+                              if (capturedImage2 != null) {
+                                _trigerPrint(capturedImage2);
+                                // Use the imageUint8List as needed
+                                print('Image captured: ${capturedImage2.lengthInBytes} bytes');
+                              } else {
+                                print('Failed to capture the widget as an image.');
+                              }
+                            })
+                          },
+                      child: const Text('new way to print')),
+
+                  if (capturedImage != null)
+                    Image.memory(
+                      capturedImage!,
+                      width: 570,
+                      fit: BoxFit.cover,
+                    ),
                 ],
               ),
             ),
